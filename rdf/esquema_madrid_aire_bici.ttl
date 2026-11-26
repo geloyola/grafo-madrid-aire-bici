@@ -19,7 +19,6 @@
 @prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
 @prefix qudt:    <http://qudt.org/schema/qudt/> .
 @prefix unit:    <http://qudt.org/vocab/unit/> .
-@prefix owl:     <http://www.w3.org/2002/07/owl#> .
 @prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
@@ -206,8 +205,7 @@ mab:anclajesDisponibles
 
 # SOSA
 sosa:hosts              a rdf:Property .   # EstacionCalidadAire -> PuntoMuestreo
-sosa:isHostedBy         a rdf:Property ;   # PuntoMuestreo -> EstacionCalidadAire
-    owl:inverseOf sosa:hosts .
+sosa:isHostedBy         a rdf:Property .   # PuntoMuestreo -> EstacionCalidadAire (inversa de sosa:hosts en SOSA)
 sosa:observes           a rdf:Property .   # PuntoMuestreo -> Contaminante
 sosa:madeBySensor       a rdf:Property .   # Medicion -> PuntoMuestreo
 sosa:observedProperty   a rdf:Property .   # Medicion -> Contaminante
