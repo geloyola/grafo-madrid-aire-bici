@@ -1,0 +1,74 @@
+digraph RDF {
+  graph [rankdir=TB, nodesep=0.35, ranksep=0.7, fontname="Helvetica", bgcolor="white", pad=0.3, newrank=true,
+         label="Esquema RDF — clases propias (mab:) y vocabularios reutilizados\nflecha discontinua = rdfs:subClassOf / rdfs:subPropertyOf · flecha sólida = propiedad de objeto", labelloc=t, fontsize=16];
+  node [shape=plain, fontname="Helvetica", fontsize=11];
+  edge [fontname="Helvetica", fontsize=10, color="#444444"];
+
+  // ---------- clases reutilizadas (vocabularios externos)
+  node [shape=box, style="rounded,filled", fontsize=11];
+  geoFeature [label="geo:Feature", fillcolor="#FFF4C2"];
+  geoGeometry [label="geo:Geometry\ngeo:asWKT → geo:wktLiteral", fillcolor="#FFF4C2"];
+  schemaPlace [label="schema:Place", fillcolor="#FBE0E0"];
+  schemaAdmin [label="schema:AdministrativeArea", fillcolor="#FBE0E0"];
+  sosaPlatform [label="sosa:Platform", fillcolor="#DDEEFF"];
+  sosaSensor [label="sosa:Sensor", fillcolor="#DDEEFF"];
+  sosaObs [label="sosa:Observation", fillcolor="#DDEEFF"];
+  sosaProp [label="sosa:ObservableProperty", fillcolor="#DDEEFF"];
+  sosaFoI [label="sosa:FeatureOfInterest", fillcolor="#DDEEFF"];
+  skosConcept [label="skos:Concept", fillcolor="#E6F4E1"];
+  qudtUnit [label="unit:MicroGM-PER-M3\nunit:MilliGM-PER-M3 (QUDT)", fillcolor="#EEEEEE"];
+
+  // ---------- clases propias
+  node [shape=plain, style=""];
+  Estacion [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="4" bgcolor="#FFFFFF" color="#2A6FDB">
+    <tr><td><b>mab:Estacion</b></td></tr>
+    <tr><td align="left"><font point-size="10">schema:name · schema:address<br align="left"/>dcterms:identifier · dcterms:source</font></td></tr></table>>];
+  Aire [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="4" color="#2A6FDB">
+    <tr><td><b>mab:EstacionCalidadAire</b></td></tr>
+    <tr><td align="left"><font point-size="10">mab:codigoCorto · mab:altitudM<br align="left"/>mab:fechaAlta (⊑ dcterms:date)</font></td></tr></table>>];
+  Bici [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="4" color="#2A6FDB">
+    <tr><td><b>mab:EstacionBiciMAD</b></td></tr>
+    <tr><td align="left"><font point-size="10">mab:numeroEstacion · mab:capacidadAnclajes<br align="left"/>mab:configuracionFisica · schema:postalCode<br align="left"/>mab:distanciaEstacionAireM</font></td></tr></table>>];
+  PM [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="4" color="#2A6FDB">
+    <tr><td><b>mab:PuntoMuestreo</b></td></tr>
+    <tr><td align="left"><font point-size="10">dcterms:identifier · mab:codigoTecnica</font></td></tr></table>>];
+  Med [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="4" color="#2A6FDB">
+    <tr><td><b>mab:Medicion</b></td></tr>
+    <tr><td align="left"><font point-size="10">sosa:hasSimpleResult · sosa:resultTime<br align="left"/>mab:codigoValidacion</font></td></tr></table>>];
+  Estado [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="4" color="#2A6FDB">
+    <tr><td><b>mab:EstadoEstacionBici</b></td></tr>
+    <tr><td align="left"><font point-size="10">sosa:resultTime · mab:bicisDisponibles<br align="left"/>mab:anclajesDisponibles</font></td></tr></table>>];
+  Cont [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="4" color="#2A6FDB">
+    <tr><td><b>mab:Contaminante</b></td></tr>
+    <tr><td align="left"><font point-size="10">skos:notation · skos:prefLabel · skos:altLabel</font></td></tr></table>>];
+  Dist [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="4" color="#2A6FDB">
+    <tr><td><b>mab:Distrito</b></td></tr>
+    <tr><td align="left"><font point-size="10">dcterms:identifier · schema:name · mab:areaM2</font></td></tr></table>>];
+  Tipo [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="4" color="#2A6FDB">
+    <tr><td><b>mab:TipoEstacion</b></td></tr>
+    <tr><td align="left"><font point-size="10">skos:notation · skos:prefLabel</font></td></tr></table>>];
+
+  // ---------- subclases (discontinuas)
+  edge [style=dashed, arrowhead=onormal, color="#888888", fontcolor="#888888"];
+  Estacion -> geoFeature; Estacion -> schemaPlace;
+  Aire -> Estacion; Aire -> sosaPlatform;
+  Bici -> Estacion; Bici -> sosaFoI;
+  PM -> sosaSensor; Med -> sosaObs; Estado -> sosaObs;
+  Cont -> sosaProp; Cont -> skosConcept; Tipo -> skosConcept;
+  Dist -> geoFeature; Dist -> schemaAdmin;
+
+  // ---------- propiedades de objeto (sólidas)
+  edge [style=solid, arrowhead=normal, color="#2A6FDB", fontcolor="#1F4E9C"];
+  Aire -> PM [label="sosa:hosts"];
+  PM -> Cont [label="sosa:observes"];
+  Med -> PM [label="sosa:madeBySensor"];
+  Med -> Cont [label="sosa:observedProperty"];
+  Estado -> Bici [label="sosa:hasFeatureOfInterest"];
+  Aire -> Tipo [label="mab:tipoEstacion"];
+  Estacion -> Dist [label="mab:ubicadaEnDistrito\n(⊑ geo:sfWithin)"];
+  Bici -> Aire [label="mab:estacionAireMasCercana"];
+  Estacion -> geoGeometry [label="geo:hasGeometry"];
+  Dist -> geoGeometry [label="geo:hasGeometry"];
+  Cont -> qudtUnit [label="qudt:unit"];
+
+}

@@ -1,0 +1,335 @@
+############################################################################
+# Esquema semántico: Calidad del aire y movilidad ciclista (BiciMAD) en Madrid
+# Práctica bimestral 1B - Interoperabilidad y Explotación de Datos en
+# Sistemas Heterogéneos (UTPL)
+# Integrantes: Gabriela Loyola, Daniel Ludeña, Suanny Mayón
+#
+# Espacio de nombres propio: mab:  (Madrid Aire-Bici)
+# Este archivo define el ESQUEMA (clases y propiedades) con RDFS;
+# al final incluye un pequeño ejemplo ilustrativo con datos reales.
+# Vocabularios reutilizados: SOSA, GeoSPARQL, Schema.org, Dublin Core Terms,
+#                            SKOS, QUDT
+############################################################################
+
+@prefix mab:     <http://example.org/madrid-aire-bici/ontologia#> .
+@prefix sosa:    <http://www.w3.org/ns/sosa/> .
+@prefix geo:     <http://www.opengis.net/ont/geosparql#> .
+@prefix schema:  <https://schema.org/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix qudt:    <http://qudt.org/schema/qudt/> .
+@prefix unit:    <http://qudt.org/vocab/unit/> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+
+############################################################################
+# 1. CLASES
+############################################################################
+
+# --- Jerarquía de estaciones -----------------------------------------------
+
+mab:Estacion
+    a rdfs:Class ;
+    rdfs:subClassOf geo:Feature , schema:Place ;
+    rdfs:label "Estación"@es ;
+    rdfs:comment "Instalación fija con una ubicación en la ciudad. Superclase de las estaciones de calidad del aire y de BiciMAD."@es .
+
+mab:EstacionCalidadAire
+    a rdfs:Class ;
+    rdfs:subClassOf mab:Estacion , sosa:Platform ;
+    rdfs:label "Estación de calidad del aire"@es ;
+    rdfs:comment "Estación de la Red de Vigilancia de la Calidad del Aire del Ayuntamiento de Madrid. Aloja uno o varios analizadores (puntos de muestreo)."@es .
+
+mab:EstacionBiciMAD
+    a rdfs:Class ;
+    rdfs:subClassOf mab:Estacion , sosa:FeatureOfInterest ;
+    rdfs:label "Estación de BiciMAD"@es ;
+    rdfs:comment "Estación del servicio público de bicicletas BiciMAD (EMT). Es el objeto observado por los estados de disponibilidad."@es .
+
+# --- Medición de la calidad del aire (patrón SOSA) --------------------------
+
+mab:PuntoMuestreo
+    a rdfs:Class ;
+    rdfs:subClassOf sosa:Sensor ;
+    rdfs:label "Punto de muestreo"@es ;
+    rdfs:comment "Analizador de una estación que mide un contaminante con una técnica concreta (p. ej. 28079035_8_8)."@es .
+
+mab:Contaminante
+    a rdfs:Class ;
+    rdfs:subClassOf sosa:ObservableProperty , skos:Concept ;
+    rdfs:label "Contaminante"@es ;
+    rdfs:comment "Magnitud medida por la red (NO2, PM10, O3...), según el Anexo II del intérprete de ficheros del Ayuntamiento."@es .
+
+mab:Medicion
+    a rdfs:Class ;
+    rdfs:subClassOf sosa:Observation ;
+    rdfs:label "Medición horaria"@es ;
+    rdfs:comment "Valor horario de un contaminante registrado por un punto de muestreo."@es .
+
+# --- Estado de BiciMAD ---------------------------------------------------------
+
+mab:EstadoEstacionBici
+    a rdfs:Class ;
+    rdfs:subClassOf sosa:Observation ;
+    rdfs:label "Estado de estación BiciMAD"@es ;
+    rdfs:comment "Disponibilidad de bicicletas y anclajes de una estación en un momento dado (feed station_status del GBFS)."@es .
+
+# --- Territorio y catálogos ----------------------------------------------------
+
+mab:Distrito
+    a rdfs:Class ;
+    rdfs:subClassOf geo:Feature , schema:AdministrativeArea ;
+    rdfs:label "Distrito"@es ;
+    rdfs:comment "Uno de los 21 distritos municipales de Madrid."@es .
+
+mab:TipoEstacion
+    a rdfs:Class ;
+    rdfs:subClassOf skos:Concept ;
+    rdfs:label "Tipo de estación de calidad del aire"@es ;
+    rdfs:comment "Clasificación de las estaciones: urbana de tráfico, urbana de fondo o suburbana."@es .
+
+############################################################################
+# 2. PROPIEDADES DE RELACIÓN (DE OBJETO) PROPIAS: conectan recursos con recursos
+############################################################################
+
+mab:ubicadaEnDistrito
+    a rdf:Property ;
+    rdfs:subPropertyOf geo:sfWithin ;
+    rdfs:domain mab:Estacion ;
+    rdfs:range mab:Distrito ;
+    rdfs:label "ubicada en distrito"@es ;
+    rdfs:comment "Distrito dentro del cual se encuentra la estación (calculado con punto en polígono)."@es .
+
+mab:tipoEstacion
+    a rdf:Property ;
+    rdfs:domain mab:EstacionCalidadAire ;
+    rdfs:range mab:TipoEstacion ;
+    rdfs:label "tipo de estación"@es .
+
+mab:estacionAireMasCercana
+    a rdf:Property ;
+    rdfs:domain mab:EstacionBiciMAD ;
+    rdfs:range mab:EstacionCalidadAire ;
+    rdfs:label "estación de aire más cercana"@es ;
+    rdfs:comment "Estación de calidad del aire con menor distancia geodésica a la estación de BiciMAD."@es .
+
+############################################################################
+# 3. PROPIEDADES DE DATOS PROPIAS: conectan recursos con valores literales
+############################################################################
+
+mab:codigoCorto
+    a rdf:Property ;
+    rdfs:subPropertyOf dcterms:identifier ;
+    rdfs:domain mab:EstacionCalidadAire ;
+    rdfs:range xsd:string ;
+    rdfs:label "código corto"@es ;
+    rdfs:comment "Número de la estación dentro del municipio (p. ej. 35)."@es .
+
+mab:numeroEstacion
+    a rdf:Property ;
+    rdfs:subPropertyOf dcterms:identifier ;
+    rdfs:domain mab:EstacionBiciMAD ;
+    rdfs:range xsd:string ;
+    rdfs:label "número de estación"@es ;
+    rdfs:comment "Número público de la estación de BiciMAD (campo obcn, p. ej. 56 o 25A)."@es .
+
+mab:altitudM
+    a rdf:Property ;
+    rdfs:domain mab:EstacionCalidadAire ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "altitud (m)"@es .
+
+mab:fechaAlta
+    a rdf:Property ;
+    rdfs:subPropertyOf dcterms:date ;
+    rdfs:domain mab:EstacionCalidadAire ;
+    rdfs:range xsd:date ;
+    rdfs:label "fecha de alta"@es ;
+    rdfs:comment "Fecha en que la estación entró en servicio."@es .
+
+mab:capacidadAnclajes
+    a rdf:Property ;
+    rdfs:domain mab:EstacionBiciMAD ;
+    rdfs:range xsd:nonNegativeInteger ;
+    rdfs:label "capacidad de anclajes"@es .
+
+mab:configuracionFisica
+    a rdf:Property ;
+    rdfs:domain mab:EstacionBiciMAD ;
+    rdfs:range xsd:string ;
+    rdfs:label "configuración física"@es ;
+    rdfs:comment "ELECTRICBIKESTATION o REGULAR, según el GBFS."@es .
+
+mab:distanciaEstacionAireM
+    a rdf:Property ;
+    rdfs:domain mab:EstacionBiciMAD ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "distancia a la estación de aire más cercana (m)"@es .
+
+mab:codigoTecnica
+    a rdf:Property ;
+    rdfs:domain mab:PuntoMuestreo ;
+    rdfs:range xsd:string ;
+    rdfs:label "código de técnica de medida"@es ;
+    rdfs:comment "Código de la técnica de medida (p. ej. 8 = quimioluminiscencia)."@es .
+
+mab:codigoValidacion
+    a rdf:Property ;
+    rdfs:domain mab:Medicion ;
+    rdfs:range xsd:string ;
+    rdfs:label "código de validación"@es ;
+    rdfs:comment "V = dato válido. Las horas marcadas N (sin dato) no se convierten en mediciones."@es .
+
+mab:areaM2
+    a rdf:Property ;
+    rdfs:domain mab:Distrito ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "área (m²)"@es .
+
+mab:bicisDisponibles
+    a rdf:Property ;
+    rdfs:domain mab:EstadoEstacionBici ;
+    rdfs:range xsd:nonNegativeInteger ;
+    rdfs:label "bicicletas disponibles"@es .
+
+mab:anclajesDisponibles
+    a rdf:Property ;
+    rdfs:domain mab:EstadoEstacionBici ;
+    rdfs:range xsd:nonNegativeInteger ;
+    rdfs:label "anclajes disponibles"@es .
+
+############################################################################
+# 4. TÉRMINOS REUTILIZADOS (declarados para documentar su uso en el proyecto)
+############################################################################
+
+# SOSA
+sosa:hosts              a rdf:Property .   # EstacionCalidadAire -> PuntoMuestreo
+sosa:isHostedBy         a rdf:Property ;   # PuntoMuestreo -> EstacionCalidadAire
+    owl:inverseOf sosa:hosts .
+sosa:observes           a rdf:Property .   # PuntoMuestreo -> Contaminante
+sosa:madeBySensor       a rdf:Property .   # Medicion -> PuntoMuestreo
+sosa:observedProperty   a rdf:Property .   # Medicion -> Contaminante
+sosa:hasFeatureOfInterest a rdf:Property . # EstadoEstacionBici -> EstacionBiciMAD
+sosa:hasSimpleResult    a rdf:Property . # valor de la medición
+sosa:resultTime         a rdf:Property ; # fecha y hora (xsd:dateTime)
+    rdfs:range xsd:dateTime .
+
+# GeoSPARQL
+geo:hasGeometry         a rdf:Property .   # Estacion/Distrito -> Geometry
+geo:asWKT               a rdf:Property ; # POINT / MULTIPOLYGON en WKT (lon lat, CRS84)
+    rdfs:range geo:wktLiteral .
+geo:sfWithin            a rdf:Property .   # superpropiedad de mab:ubicadaEnDistrito
+
+# Schema.org
+schema:name             a rdf:Property .
+schema:address          a rdf:Property .
+schema:postalCode       a rdf:Property .
+
+# Dublin Core Terms
+dcterms:identifier      a rdf:Property . # códigos oficiales de cada fuente
+dcterms:source          a rdf:Property .   # conjunto de datos de origen
+
+# SKOS
+skos:prefLabel          a rdf:Property .
+skos:altLabel           a rdf:Property .
+skos:notation           a rdf:Property .
+skos:inScheme           a rdf:Property .
+
+# QUDT
+qudt:unit               a rdf:Property .   # Contaminante -> unidad de medida
+
+############################################################################
+# 5. VOCABULARIOS CONTROLADOS (SKOS)
+############################################################################
+
+mab:EsquemaTiposEstacion
+    a skos:ConceptScheme ;
+    skos:prefLabel "Tipos de estación de calidad del aire"@es .
+
+mab:UrbanaTrafico   a mab:TipoEstacion ; skos:inScheme mab:EsquemaTiposEstacion ;
+    skos:notation "UT" ; skos:prefLabel "Urbana tráfico"@es .
+mab:UrbanaFondo     a mab:TipoEstacion ; skos:inScheme mab:EsquemaTiposEstacion ;
+    skos:notation "UF" ; skos:prefLabel "Urbana fondo"@es .
+mab:Suburbana       a mab:TipoEstacion ; skos:inScheme mab:EsquemaTiposEstacion ;
+    skos:notation "S"  ; skos:prefLabel "Suburbana"@es .
+
+mab:EsquemaContaminantes
+    a skos:ConceptScheme ;
+    skos:prefLabel "Magnitudes de la red de calidad del aire (Anexo II)"@es .
+
+mab:SO2  a mab:Contaminante ; skos:inScheme mab:EsquemaContaminantes ; skos:notation "1" ;
+    skos:prefLabel "Dióxido de azufre"@es ; skos:altLabel "SO2" ; qudt:unit unit:MicroGM-PER-M3 .
+mab:CO   a mab:Contaminante ; skos:inScheme mab:EsquemaContaminantes ; skos:notation "6" ;
+    skos:prefLabel "Monóxido de carbono"@es ; skos:altLabel "CO" ; qudt:unit unit:MilliGM-PER-M3 .
+mab:NO   a mab:Contaminante ; skos:inScheme mab:EsquemaContaminantes ; skos:notation "7" ;
+    skos:prefLabel "Monóxido de nitrógeno"@es ; skos:altLabel "NO" ; qudt:unit unit:MicroGM-PER-M3 .
+mab:NO2  a mab:Contaminante ; skos:inScheme mab:EsquemaContaminantes ; skos:notation "8" ;
+    skos:prefLabel "Dióxido de nitrógeno"@es ; skos:altLabel "NO2" ; qudt:unit unit:MicroGM-PER-M3 .
+mab:PM25 a mab:Contaminante ; skos:inScheme mab:EsquemaContaminantes ; skos:notation "9" ;
+    skos:prefLabel "Partículas < 2,5 µm"@es ; skos:altLabel "PM2.5" ; qudt:unit unit:MicroGM-PER-M3 .
+mab:PM10 a mab:Contaminante ; skos:inScheme mab:EsquemaContaminantes ; skos:notation "10" ;
+    skos:prefLabel "Partículas < 10 µm"@es ; skos:altLabel "PM10" ; qudt:unit unit:MicroGM-PER-M3 .
+mab:NOx  a mab:Contaminante ; skos:inScheme mab:EsquemaContaminantes ; skos:notation "12" ;
+    skos:prefLabel "Óxidos de nitrógeno"@es ; skos:altLabel "NOx" ; qudt:unit unit:MicroGM-PER-M3 .
+mab:O3   a mab:Contaminante ; skos:inScheme mab:EsquemaContaminantes ; skos:notation "14" ;
+    skos:prefLabel "Ozono"@es ; skos:altLabel "O3" ; qudt:unit unit:MicroGM-PER-M3 .
+mab:TOL  a mab:Contaminante ; skos:inScheme mab:EsquemaContaminantes ; skos:notation "20" ;
+    skos:prefLabel "Tolueno"@es ; skos:altLabel "TOL" ; qudt:unit unit:MicroGM-PER-M3 .
+mab:BEN  a mab:Contaminante ; skos:inScheme mab:EsquemaContaminantes ; skos:notation "30" ;
+    skos:prefLabel "Benceno"@es ; skos:altLabel "BEN" ; qudt:unit unit:MicroGM-PER-M3 .
+mab:EBE  a mab:Contaminante ; skos:inScheme mab:EsquemaContaminantes ; skos:notation "35" ;
+    skos:prefLabel "Etilbenceno"@es ; skos:altLabel "EBE" ; qudt:unit unit:MicroGM-PER-M3 .
+
+############################################################################
+# 6. EJEMPLO ILUSTRATIVO (datos reales; la carga masiva corresponde a 1C)
+############################################################################
+
+@prefix mabr: <http://example.org/madrid-aire-bici/recurso/> .
+
+mabr:distrito-01 a mab:Distrito ;
+    dcterms:identifier "01" ; schema:name "Centro" ; mab:areaM2 5228245.51 .
+
+mabr:aire-28079035 a mab:EstacionCalidadAire ;
+    dcterms:identifier "28079035" ; mab:codigoCorto "35" ;
+    schema:name "Plaza del Carmen" ;
+    schema:address "Plaza del Carmen esq. Tres Cruces" ;
+    mab:altitudM 660 ; mab:fechaAlta "1999-11-01"^^xsd:date ;
+    mab:tipoEstacion mab:UrbanaFondo ;
+    mab:ubicadaEnDistrito mabr:distrito-01 ;
+    geo:hasGeometry mabr:geom-aire-28079035 ;
+    sosa:hosts mabr:pm-28079035_8_8 ;
+    dcterms:source <https://datos.madrid.es/dataset/212629-0-estaciones-control-aire> .
+
+mabr:geom-aire-28079035 a geo:Geometry ;
+    geo:asWKT "POINT(-3.7031662 40.4192091)"^^geo:wktLiteral .
+
+mabr:pm-28079035_8_8 a mab:PuntoMuestreo ;
+    dcterms:identifier "28079035_8_8" ;
+    sosa:isHostedBy mabr:aire-28079035 ;
+    sosa:observes mab:NO2 ;
+    mab:codigoTecnica "8" .
+
+mabr:med-28079035_8_8-2026-10-29T01 a mab:Medicion ;
+    sosa:madeBySensor mabr:pm-28079035_8_8 ;
+    sosa:observedProperty mab:NO2 ;
+    sosa:resultTime "2026-10-29T01:00:00+01:00"^^xsd:dateTime ;
+    sosa:hasSimpleResult 72 ;
+    mab:codigoValidacion "V" ;
+    dcterms:source <https://datos.madrid.es/dataset/212531-0-calidad-aire-tiempo-real> .
+
+mabr:bici-1460 a mab:EstacionBiciMAD ;
+    dcterms:identifier "1460" ; mab:numeroEstacion "56" ;
+    schema:name "56 - Plaza del Carmen" ;
+    schema:address "Calle Abada, 2" ;
+    mab:capacidadAnclajes 44 ;
+    mab:configuracionFisica "REGULAR" ;
+    mab:ubicadaEnDistrito mabr:distrito-01 ;
+    mab:estacionAireMasCercana mabr:aire-28079035 ;
+    mab:distanciaEstacionAireM 65 ;
+    geo:hasGeometry mabr:geom-bici-1460 ;
+    dcterms:source <https://datos.madrid.es/dataset/900021-0-bicimad-gbfs> .
+
+mabr:geom-bici-1460 a geo:Geometry ;
+    geo:asWKT "POINT(-3.7039033 40.4190322)"^^geo:wktLiteral .

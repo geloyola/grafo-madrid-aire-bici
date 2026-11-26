@@ -1,0 +1,49 @@
+digraph MER {
+  graph [rankdir=LR, splines=ortho, nodesep=0.6, ranksep=1.1, fontname="Helvetica", bgcolor="white", pad=0.3,
+         label="Modelo entidad-relación — Calidad del aire y BiciMAD en Madrid\nPK = clave primaria · FK = clave foránea · cardinalidad (mín..máx) en cada extremo", labelloc=t, fontsize=16];
+  node [shape=plain, fontname="Helvetica", fontsize=11];
+  edge [fontname="Helvetica", fontsize=10, color="#555555", arrowhead=none, arrowtail=none, dir=both];
+
+  DISTRITO [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5">
+   <tr><td bgcolor="#DCEBFA"><b>DISTRITO</b></td></tr>
+   <tr><td align="left"><u>PK cod_distrito</u> : entero<br align="left"/>nombre : texto<br align="left"/>area_m2 : decimal<br align="left"/>geometria : polígono<br align="left"/></td></tr></table>>];
+
+  TIPO [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5">
+   <tr><td bgcolor="#EDE4F7"><b>TIPO_ESTACION</b></td></tr>
+   <tr><td align="left"><u>PK cod_tipo</u> : {UT, UF, S}<br align="left"/>nombre : texto<br align="left"/></td></tr></table>>];
+
+  AIRE [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5">
+   <tr><td bgcolor="#DFF3E4"><b>ESTACION_CALIDAD_AIRE</b></td></tr>
+   <tr><td align="left"><u>PK codigo</u> : texto (8 díg.)<br align="left"/>codigo_corto : texto<br align="left"/>nombre : texto<br align="left"/>direccion : texto<br align="left"/>latitud, longitud : decimal<br align="left"/>altitud_m : decimal<br align="left"/>fecha_alta : fecha<br align="left"/><i>FK cod_tipo</i><br align="left"/><i>FK cod_distrito</i><br align="left"/></td></tr></table>>];
+
+  CONT [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5">
+   <tr><td bgcolor="#EDE4F7"><b>CONTAMINANTE</b></td></tr>
+   <tr><td align="left"><u>PK cod_magnitud</u> : entero<br align="left"/>nombre : texto<br align="left"/>abreviatura : texto<br align="left"/>unidad : {µg/m³, mg/m³}<br align="left"/></td></tr></table>>];
+
+  PM [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5">
+   <tr><td bgcolor="#DFF3E4"><b>PUNTO_MUESTREO</b></td></tr>
+   <tr><td align="left"><u>PK punto_muestreo</u> : texto<br align="left"/><i>FK codigo_estacion</i><br align="left"/><i>FK cod_magnitud</i><br align="left"/>cod_tecnica : texto<br align="left"/></td></tr></table>>];
+
+  MED [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5">
+   <tr><td bgcolor="#DFF3E4"><b>MEDICION</b></td></tr>
+   <tr><td align="left"><u>PK, FK punto_muestreo</u><br align="left"/><u>PK fecha_hora</u> : fecha-hora<br align="left"/>valor : decimal (≥ 0)<br align="left"/>validacion : {V}<br align="left"/></td></tr></table>>];
+
+  BICI [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5">
+   <tr><td bgcolor="#FCE9D6"><b>ESTACION_BICIMAD</b></td></tr>
+   <tr><td align="left"><u>PK station_id</u> : texto<br align="left"/>numero (obcn) : texto<br align="left"/>nombre : texto<br align="left"/>direccion : texto<br align="left"/>codigo_postal : texto (opcional)<br align="left"/>latitud, longitud : decimal<br align="left"/>capacidad : entero (&gt; 0)<br align="left"/>configuracion_fisica : texto<br align="left"/><i>FK cod_distrito</i> (nulo si fuera de Madrid)<br align="left"/><i>FK estacion_aire_cercana</i><br align="left"/>distancia_aire_m : decimal (≥ 0)<br align="left"/></td></tr></table>>];
+
+  ESTADO [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5">
+   <tr><td bgcolor="#FCE9D6"><b>ESTADO_ESTACION_BICI</b></td></tr>
+   <tr><td align="left"><u>PK, FK station_id</u><br align="left"/><u>PK fecha_hora</u> : fecha-hora<br align="left"/>bicis_disponibles : entero (≥ 0)<br align="left"/>anclajes_disponibles : entero (≥ 0)<br align="left"/>estado : texto<br align="left"/></td></tr></table>>];
+
+  TIPO -> AIRE [xlabel="clasifica", taillabel="1..1", headlabel="1..N"];
+  DISTRITO -> AIRE [xlabel="contiene", taillabel="1..1", headlabel="0..N"];
+  DISTRITO -> BICI [xlabel="contiene", taillabel="0..1", headlabel="0..N"];
+  AIRE -> PM [xlabel="aloja", taillabel="1..1", headlabel="1..N"];
+  CONT -> PM [xlabel="es medido por", taillabel="1..1", headlabel="0..N"];
+  PM -> MED [xlabel="registra", taillabel="1..1", headlabel="0..N"];
+  BICI -> AIRE [xlabel="más cercana a\n(distancia_aire_m)", taillabel="0..N", headlabel="1..1"];
+  BICI -> ESTADO [xlabel="tiene", taillabel="1..1", headlabel="0..N"];
+
+  {rank=same; TIPO; DISTRITO; CONT}
+}
