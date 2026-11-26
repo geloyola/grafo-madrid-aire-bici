@@ -1,6 +1,6 @@
 # Grafo de conocimiento: calidad del aire y BiciMAD en Madrid
 
-Práctica bimestral 1 (entregas 1A y 1B) de la asignatura **Interoperabilidad y Explotación de Datos en Sistemas Heterogéneos**, UTPL.
+Práctica bimestral 1 (entregas 1A, 1B y 1C) de la asignatura **Interoperabilidad y Explotación de Datos en Sistemas Heterogéneos**, UTPL.
 Docente: Ing. Eduardo Encalada.
 
 **Integrantes:** Gabriela Loyola, Daniel Ludeña, Suanny Mayón.
@@ -11,8 +11,9 @@ Docente: Ing. Eduardo Encalada.
 | --- | --- |
 | `datos/` | Archivos reales descargados de las fuentes oficiales (28-29 de octubre de 2026) |
 | `modelos/` | Diagrama del modelo entidad-relación y del esquema RDF (PNG, SVG y fuente Graphviz `.dot`) |
-| `rdf/` | Esquema semántico en Turtle (`esquema_madrid_aire_bici.ttl`) |
-| `scripts/` | Script de caracterización de los datos (`analisis_fuentes.py`) |
+| `rdf/` | Esquema semántico (`esquema_madrid_aire_bici.ttl`) e instancias generadas en 1C (`instancias_madrid_aire_bici.ttl`) |
+| `scripts/` | Caracterización de los datos (`analisis_fuentes.py`, 1B) y transformación a RDF (`transformacion_rdf.py`, 1C) |
+| `evidencias/` | Capturas de la implementación y exploración del grafo en GraphDB (1C) |
 
 ## Archivos de datos
 
@@ -35,6 +36,20 @@ Solo necesita Python 3 (biblioteca estándar). Imprime el número de registros, 
 duplicados, inconsistencias y los vínculos entre fuentes.
 
 Para regenerar los diagramas: `dot -Tpng modelos/mer.dot -o modelos/mer.png` (requiere Graphviz).
+
+## Cómo generar el grafo RDF (1C)
+
+```bash
+pip install rdflib tzdata
+python scripts/transformacion_rdf.py
+```
+
+Lee los archivos de `datos/`, limpia los valores (espacios, decimales con coma, horas sin dato «N») y genera
+`rdf/instancias_madrid_aire_bici.ttl` con 13 426 tripletas: 21 distritos, 24 estaciones de calidad del aire,
+126 puntos de muestreo, 378 mediciones horarias y 678 estaciones de BiciMAD. Junto con el esquema (218 tripletas)
+el grafo completo tiene 13 644 tripletas.
+
+Para cargarlo en GraphDB se importan los dos archivos de `rdf/` en un mismo repositorio.
 
 ## Vocabularios reutilizados en el esquema
 

@@ -5,8 +5,8 @@
 # Integrantes: Gabriela Loyola, Daniel Ludeña, Suanny Mayón
 #
 # Espacio de nombres propio: mab:  (Madrid Aire-Bici)
-# Este archivo define el ESQUEMA (clases y propiedades) con RDFS;
-# al final incluye un pequeño ejemplo ilustrativo con datos reales.
+# Este archivo define el ESQUEMA (clases y propiedades) con RDFS.
+# Las instancias generadas en 1C están en instancias_madrid_aire_bici.ttl.
 # Vocabularios reutilizados: SOSA, GeoSPARQL, Schema.org, Dublin Core Terms,
 #                            SKOS, QUDT
 ############################################################################
@@ -279,55 +279,3 @@ mab:BEN  a mab:Contaminante ; skos:inScheme mab:EsquemaContaminantes ; skos:nota
     skos:prefLabel "Benceno"@es ; skos:altLabel "BEN" ; qudt:unit unit:MicroGM-PER-M3 .
 mab:EBE  a mab:Contaminante ; skos:inScheme mab:EsquemaContaminantes ; skos:notation "35" ;
     skos:prefLabel "Etilbenceno"@es ; skos:altLabel "EBE" ; qudt:unit unit:MicroGM-PER-M3 .
-
-############################################################################
-# 6. EJEMPLO ILUSTRATIVO (datos reales; la carga masiva corresponde a 1C)
-############################################################################
-
-@prefix mabr: <http://example.org/madrid-aire-bici/recurso/> .
-
-mabr:distrito-01 a mab:Distrito ;
-    dcterms:identifier "01" ; schema:name "Centro" ; mab:areaM2 5228245.51 .
-
-mabr:aire-28079035 a mab:EstacionCalidadAire ;
-    dcterms:identifier "28079035" ; mab:codigoCorto "35" ;
-    schema:name "Plaza del Carmen" ;
-    schema:address "Plaza del Carmen esq. Tres Cruces" ;
-    mab:altitudM 660 ; mab:fechaAlta "1999-11-01"^^xsd:date ;
-    mab:tipoEstacion mab:UrbanaFondo ;
-    mab:ubicadaEnDistrito mabr:distrito-01 ;
-    geo:hasGeometry mabr:geom-aire-28079035 ;
-    sosa:hosts mabr:pm-28079035_8_8 ;
-    dcterms:source <https://datos.madrid.es/dataset/212629-0-estaciones-control-aire> .
-
-mabr:geom-aire-28079035 a geo:Geometry ;
-    geo:asWKT "POINT(-3.7031662 40.4192091)"^^geo:wktLiteral .
-
-mabr:pm-28079035_8_8 a mab:PuntoMuestreo ;
-    dcterms:identifier "28079035_8_8" ;
-    sosa:isHostedBy mabr:aire-28079035 ;
-    sosa:observes mab:NO2 ;
-    mab:codigoTecnica "8" .
-
-mabr:med-28079035_8_8-2026-10-29T01 a mab:Medicion ;
-    sosa:madeBySensor mabr:pm-28079035_8_8 ;
-    sosa:observedProperty mab:NO2 ;
-    sosa:resultTime "2026-10-29T01:00:00+01:00"^^xsd:dateTime ;
-    sosa:hasSimpleResult 72 ;
-    mab:codigoValidacion "V" ;
-    dcterms:source <https://datos.madrid.es/dataset/212531-0-calidad-aire-tiempo-real> .
-
-mabr:bici-1460 a mab:EstacionBiciMAD ;
-    dcterms:identifier "1460" ; mab:numeroEstacion "56" ;
-    schema:name "56 - Plaza del Carmen" ;
-    schema:address "Calle Abada, 2" ;
-    mab:capacidadAnclajes 44 ;
-    mab:configuracionFisica "REGULAR" ;
-    mab:ubicadaEnDistrito mabr:distrito-01 ;
-    mab:estacionAireMasCercana mabr:aire-28079035 ;
-    mab:distanciaEstacionAireM 65 ;
-    geo:hasGeometry mabr:geom-bici-1460 ;
-    dcterms:source <https://datos.madrid.es/dataset/900021-0-bicimad-gbfs> .
-
-mabr:geom-bici-1460 a geo:Geometry ;
-    geo:asWKT "POINT(-3.7039033 40.4190322)"^^geo:wktLiteral .
